@@ -1,3 +1,5 @@
+use log::{info, error};
+
 /// Represents errors that may occur during contract interactions.
 #[derive(Debug)]
 pub enum InteractionError {
@@ -20,12 +22,6 @@ pub enum InteractionError {
 ///
 /// # Returns
 /// Result<String, InteractionError> - Returns a success message or an error if the function call fails.
-///
-/// # Example
-/// ```
-/// let result = call_contract_function("0x123...", "transfer", vec![], 21000);
-/// assert!(result.is_ok());
-/// ```
 pub fn call_contract_function(
     contract_address: &str,
     function_name: &str,
@@ -33,14 +29,16 @@ pub fn call_contract_function(
     gas_limit: u64,
 ) -> Result<String, InteractionError> {
     if contract_address.is_empty() {
+        error!("Invalid contract address provided.");
         return Err(InteractionError::InvalidContractAddress);
     }
 
     if function_name.is_empty() {
+        error!("Invalid function name provided.");
         return Err(InteractionError::InvalidFunctionName);
     }
 
-    println!(
+    info!(
         "Calling function '{}' on contract '{}' with gas limit {}...",
         function_name, contract_address, gas_limit
     );
@@ -57,25 +55,21 @@ pub fn call_contract_function(
 ///
 /// # Returns
 /// Result<String, InteractionError> - Returns the data or an error if the fetch fails.
-///
-/// # Example
-/// ```
-/// let result = fetch_contract_data("0x123...", "balance");
-/// assert!(result.is_ok());
-/// ```
 pub fn fetch_contract_data(
     contract_address: &str,
     data_key: &str,
 ) -> Result<String, InteractionError> {
     if contract_address.is_empty() {
+        error!("Invalid contract address provided.");
         return Err(InteractionError::InvalidContractAddress);
     }
 
     if data_key.is_empty() {
+        error!("Data key not found.");
         return Err(InteractionError::DataKeyNotFound);
     }
 
-    println!("Fetching data '{}' from contract '{}'...", data_key, contract_address);
+    info!("Fetching data '{}' from contract '{}'...", data_key, contract_address);
 
     Ok("Data fetched successfully.".to_string())
 }
