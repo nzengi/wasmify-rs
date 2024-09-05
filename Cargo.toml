@@ -9,7 +9,7 @@ repository = "https://github.com/nzengi/wasmify-rs"  # GitHub projesi varsa ekle
 documentation = "https://docs.rs/wasmify-rs"  # Rust dokümantasyon adresi
 homepage = "https://github.com/nzengi/wasmify-rs"  # Projenin ana sayfa adresi
 keywords = ["wasm", "rust", "smart-contract", "gas-optimization", "blockchain"]
-categories = ["cryptography", "blockchain", "web-programming"]
+categories = ["cryptography", "web-programming"]
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
