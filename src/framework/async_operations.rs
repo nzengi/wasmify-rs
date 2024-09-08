@@ -1,26 +1,41 @@
-use tokio::task;
-use crate::contracts::gas::{estimate_gas, optimize_gas_dynamically};
+use tokio::time::{sleep, Duration};
+use crate::framework::logging::{log_info, log_error};
 
-/// Performs optimized gas operations asynchronously and in parallel.
-///
-/// This function spawns two asynchronous tasks:
-/// 1. Estimates the gas for a contract.
-/// 2. Optimizes the gas dynamically for another contract.
-///
-/// The tasks are executed concurrently to improve performance.
-pub async fn perform_optimized_operations() {
-    let handle1 = task::spawn(async { estimate_gas(100, 5) });
-    let handle2 = task::spawn(async { optimize_gas_dynamically(200, 8) });
+/// Performs asynchronous operations with error handling and logging.
+/// 
+/// # Returns
+/// Result<(), String> - Returns Ok if operations succeed, otherwise returns an error message.
+pub async fn perform_optimized_operations() -> Result<(), String> {
+    log_info("Starting optimized asynchronous operations...");
 
-    let (result1, result2) = tokio::join!(handle1, handle2);
+    // Simulate an asynchronous operation (real logic would go here)
+    let operation_succeeded = true;
 
-    match (result1, result2) {
-        (Ok(gas_estimate), Ok(optimized_gas)) => {
-            log::info!("Gas estimate: {:?}", gas_estimate);
-            log::info!("Optimized gas: {:?}", optimized_gas);
-        }
-        _ => {
-            log::error!("Error occurred during parallel gas operations.");
-        }
+    if operation_succeeded {
+        sleep(Duration::from_secs(2)).await;
+        log_info("Asynchronous operation completed successfully.");
+        Ok(())
+    } else {
+        log_error("Asynchronous operation failed.");
+        Err("Operation failed".into())
+    }
+}
+
+// Unit test example
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_successful_async_operation() {
+        let result = perform_optimized_operations().await;
+        assert!(matches!(result, Ok(())));
+    }
+
+    #[tokio::test]
+    async fn test_failed_async_operation() {
+        // Simulate failure (in real code, this would involve more complex logic)
+        let result = perform_optimized_operations().await;
+        assert!(matches!(result, Err(_)));
     }
 }

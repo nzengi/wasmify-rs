@@ -40,3 +40,42 @@ pub fn parse_abi(abi_json: &str) -> Result<Vec<AbiFunction>, String> {
     Ok(parsed)
 }
 
+// Unit test example
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_empty_abi_json() {
+        let result = parse_abi("");
+        assert!(matches!(result, Err(_)));
+    }
+
+    #[test]
+    fn test_invalid_abi_json() {
+        let result = parse_abi("invalid_json");
+        assert!(matches!(result, Err(_)));
+    }
+
+    #[test]
+    fn test_valid_abi_json() {
+        let abi_json = r#"
+        [
+            {
+                "name": "transfer",
+                "inputs": ["address", "uint256"],
+                "outputs": [],
+                "payable": false,
+                "constant": false
+            }
+        ]
+        "#;
+
+        let result = parse_abi(abi_json);
+        assert!(matches!(result, Ok(_)));
+        let functions = result.unwrap();
+        assert_eq!(functions.len(), 1);
+        assert_eq!(functions[0].name, "transfer");
+        assert_eq!(functions[0].inputs, vec!["address", "uint256"]);
+    }
+}

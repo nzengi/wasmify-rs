@@ -1,42 +1,69 @@
-/// Errors that can occur during contract transaction watching.
+use crate::framework::logging::{log_info, log_error};
+use web3::types::Address;
+use std::str::FromStr;
+use std::time::Duration;
+
+/// Errors that can occur during contract watching.
 #[derive(Debug)]
 pub enum WatchError {
-    InvalidContractAddress,
-    MonitoringFailed,
+    InvalidAddress,
+    EventListeningFailed,
 }
 
-/// Watches for transactions related to a specific smart contract.
-///
+/// Watches for events from a smart contract with security checks and error handling.
+/// 
 /// # Arguments
-/// * `contract_address` - The address of the contract to watch (ownership is moved to the function).
-/// * `poll_interval` - The time interval (in seconds) to poll for transactions.
-/// * `callback` - A function to call when a transaction is detected.
+/// * `contract_address` - The address of the contract.
+/// * `event_name` - The name of the event to watch for.
+/// * `poll_interval` - How often to check for events.
 ///
 /// # Returns
-/// A result indicating whether the watching process was successful or an error occurred.
-pub fn watch_contract_transactions<F>(
-    contract_address: String,  // Ownership of contract_address is moved.
-    poll_interval: std::time::Duration,
-    callback: F,
-) -> Result<(), WatchError>
-where
-    F: Fn(&str) + Send + 'static,
-{
-    if contract_address.is_empty() {
-        return Err(WatchError::InvalidContractAddress);
+/// Result<(), WatchError> - Returns Ok if event watching succeeds, otherwise returns an error.
+pub async fn watch_contract_events(
+    contract_address: &str,
+    event_name: &str,
+    poll_interval: Duration,
+) -> Result<(), WatchError> {
+    // Input validation: ensure contract address is valid
+    if Address::from_str(contract_address).is_err() {
+        return Err(WatchError::InvalidAddress);
     }
 
-    println!("Starting to watch contract at address {}...", contract_address);
+    log_info(&format!("Starting to watch events for contract: {}", contract_address)); // Corrected log
 
-    // Simulating continuous polling in a new thread.
-    std::thread::spawn(move || {
-        for _ in 0..5 {
-            std::thread::sleep(poll_interval);
-            let simulated_transaction = format!("Transaction detected for contract: {}", contract_address);
-            callback(&simulated_transaction);
-        }
-        println!("Stopped watching contract at address {}.", contract_address);
-    });
+    // Simulate event watching logic (real logic would go here)
+    let event_found = false;
 
-    Ok(())
+    if event_found {
+        log_info(&format!("Event '{}' found for contract: {}", event_name, contract_address)); // Corrected log
+        Ok(())
+    } else {
+        log_error(&format!("No events found for contract: {}", contract_address)); // Corrected log
+        Err(WatchError::EventListeningFailed)
+    }
+}
+
+// Unit test example
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::time::Duration;
+
+    #[tokio::test]
+    async fn test_invalid_contract_address() {
+        let result = watch_contract_events("invalid", "TestEvent", Duration::from_secs(5)).await;
+        assert!(matches!(result, Err(WatchError::InvalidAddress)));
+    }
+
+    #[tokio::test]
+    async fn test_successful_event_watch() {
+        let result = watch_contract_events("0x1234567890abcdef1234567890abcdef12345678", "TestEvent", Duration::from_secs(5)).await;
+        assert!(matches!(result, Ok(())));
+    }
+
+    #[tokio::test]
+    async fn test_event_listening_failure() {
+        let result = watch_contract_events("0x1234567890abcdef1234567890abcdef12345678", "MissingEvent", Duration::from_secs(5)).await;
+        assert!(matches!(result, Err(WatchError::EventListeningFailed)));
+    }
 }

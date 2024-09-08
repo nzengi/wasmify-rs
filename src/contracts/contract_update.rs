@@ -1,49 +1,70 @@
-/// Errors that can occur during the contract update process.
-///
-/// # Variants
-/// - `InvalidContractAddress`: The provided contract address is empty or invalid.
-/// - `EmptyUpdateData`: No data was provided to update the contract.
+use crate::framework::logging::{log_info, log_error};
+use web3::types::Address;
+use std::str::FromStr;
+
+/// Errors that can occur during contract updates.
 #[derive(Debug)]
 pub enum UpdateError {
-    InvalidContractAddress,
-    EmptyUpdateData,
+    InvalidAddress,
+    UpdateFailed,
 }
 
-/// Updates a smart contract with the provided data and gas limit.
-///
+/// Updates a smart contract with security checks and error handling.
+/// 
 /// # Arguments
-/// * `contract_address`: The address of the contract to be updated.
-/// * `update_data`: A byte slice containing the update data.
-/// * `gas_limit`: The maximum amount of gas allowed for the update.
+/// * `contract_address` - The address of the contract to update.
+/// * `new_code` - The new bytecode for the contract.
 ///
 /// # Returns
-/// A `Result` indicating success or failure. If the contract address or update data is invalid,
-/// an `UpdateError` is returned.
-///
-/// # Errors
-/// * Returns `UpdateError::InvalidContractAddress` if the contract address is empty.
-/// * Returns `UpdateError::EmptyUpdateData` if the update data is empty.
-pub fn update_contract(
+/// Result<(), UpdateError> - Returns Ok if the contract is updated successfully, otherwise returns an error.
+pub async fn update_contract(
     contract_address: &str,
-    update_data: &[u8],
-    gas_limit: u64,
+    new_code: &[u8],
 ) -> Result<(), UpdateError> {
-    if contract_address.is_empty() {
-        return Err(UpdateError::InvalidContractAddress);
+    // Input validation: ensure contract address is valid
+    if Address::from_str(contract_address).is_err() {
+        return Err(UpdateError::InvalidAddress);
     }
 
-    if update_data.is_empty() {
-        return Err(UpdateError::EmptyUpdateData);
+    // Input validation: ensure the new contract code is not empty
+    if new_code.is_empty() {
+        return Err(UpdateError::UpdateFailed);
     }
 
-    // Simulate updating the contract.
-    println!(
-        "Updating contract at address '{}' with gas limit {}...",
-        contract_address, gas_limit
-    );
+    log_info(&format!("Updating contract at address: {}", contract_address));
 
-    // Simulate successful update.
-    println!("Contract updated successfully!");
+    // Simulate contract update (real logic would go here)
+    let update_succeeded = true;  // Simulating a successful update
 
-    Ok(())
+    if update_succeeded {
+        log_info("Contract updated successfully."); // Using log_info instead of info!
+        Ok(())
+    } else {
+        log_error("Contract update failed."); // Using log_error instead of error!
+        Err(UpdateError::UpdateFailed)
+    }
+}
+
+// Unit test example
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_invalid_contract_address() {
+        let result = update_contract("invalid", &[0x60, 0x80, 0x60, 0x40]).await;
+        assert!(matches!(result, Err(UpdateError::InvalidAddress)));
+    }
+
+    #[tokio::test]
+    async fn test_empty_contract_code() {
+        let result = update_contract("0x1234567890abcdef1234567890abcdef12345678", &[]).await;
+        assert!(matches!(result, Err(UpdateError::UpdateFailed)));
+    }
+
+    #[tokio::test]
+    async fn test_successful_update() {
+        let result = update_contract("0x1234567890abcdef1234567890abcdef12345678", &[0x60, 0x80, 0x60, 0x40]).await;
+        assert!(matches!(result, Ok(())));
+    }
 }

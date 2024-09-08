@@ -1,24 +1,44 @@
 [package]
-name = "wasmify-rs"  # Crates.io üzerinde yayınlanacak isim
-version = "0.1.0"  # Versiyon numarası
-authors = ["zengi <zenginureddin1@gmail.com>"]  # Kendi email adresinizi girin
+name = "wasmify-rs"
+version = "0.1.1"
+authors = ["Your Name <your.email@example.com>"]
 edition = "2021"
-description = "A high-performance Rust library for smart contract management and gas optimization."
-license = "MIT"  # Lisans türü
-repository = "https://github.com/nzengi/wasmify-rs"  # GitHub projesi varsa ekleyin
-documentation = "https://docs.rs/wasmify-rs"  # Rust dokümantasyon adresi
-homepage = "https://github.com/nzengi/wasmify-rs"  # Projenin ana sayfa adresi
-keywords = ["wasm", "rust", "smart-contract", "gas-optimization", "blockchain"]
+description = "A Rust-based WebAssembly smart contract platform for Ethereum."
+license = "MIT"
+repository = "https://github.com/yourusername/spawn_swap"
+documentation = "https://docs.rs/spawn_swap"
+keywords = ["ethereum", "smart-contract", "webassembly", "rust"]
 categories = ["cryptography", "web-programming"]
+readme = "README.md"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
 
 [dependencies]
+web3 = "0.15"
 serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
-tokio = { version = "1", features = ["full"] }
-web3 = "0.15.0"
-log = "0.4"
-env_logger = "0.9"
-futures = "0.3"
-wasm-bindgen = "0.2.78"
-anyhow = "1.0"
+serde_json = { version = "1.0", optional = true }
 chrono = "0.4"
+log = { version = "0.4.22", optional = true }
+env_logger = { version = "0.9", optional = true }
+
+# Optional dependencies for specific use cases
+tokio = { version = "1", features = ["full"], optional = true }
+
+[dev-dependencies]
+serde_json = "1.0"
+
+[features]
+async = ["tokio", "serde_json"]
+logging = ["log", "env_logger"]
+
+[build-dependencies]
+cargo = "0.52"
+
+[profile.release]
+opt-level = "z"
+
+[[bin]]
+name = "wasmify_rs"
+path = "src/main.rs"
+
